@@ -57,9 +57,10 @@ namespace HackVMTranslator
                         command += "@" + keywords[(int)dest] + comment + "\nD=M\n";
                         command += "@" + val + "\nD=D+A\n";
                     }
-                    
-                    command += "@" + pushRegister + "\nM=D\n@SP\nA=M\nD=M\n";
-                    command += "@" + pushRegister + "\nA=M\nM=D\n@SP\nM=M+1";
+                    command += "A=D\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1";
+
+                    //command += "@" + pushRegister + "\nM=D\n@SP\nA=M\nD=M\n";
+                    //command += "@" + pushRegister + "\nA=M\nM=D\n@SP\nM=M+1";
                     break;
                 case Command.C_POP:
                     if (dest == Destination.D_TEMP)

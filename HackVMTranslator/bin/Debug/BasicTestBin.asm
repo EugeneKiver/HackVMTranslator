@@ -155,12 +155,9 @@ M=D
 D=M
 @0
 D=D+A
-@R13
-M=D
-@SP
-A=M
+A=D
 D=M
-@R13
+@SP
 A=M
 M=D
 @SP
@@ -169,12 +166,81 @@ M=M+1
 D=M
 @5
 D=D+A
-@R13
-M=D
+A=D
+D=M
 @SP
 A=M
+M=D
+@SP
+M=M+1
+@SP // ADD
 D=M
-@R13
+M=D-1
+A=M
+D=M
+A=A-1
+M=M+D
+@ARG // C_PUSH D_ARGUMENT 1
+D=M
+@1
+D=D+A
+A=D
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@SP // SUB
+D=M
+M=D-1
+A=M
+D=M
+A=A-1
+M=M-D
+@THIS // C_PUSH D_THIS 6
+D=M
+@6
+D=D+A
+A=D
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@THIS // C_PUSH D_THIS 6
+D=M
+@6
+D=D+A
+A=D
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@SP // ADD
+D=M
+M=D-1
+A=M
+D=M
+A=A-1
+M=M+D
+@SP // SUB
+D=M
+M=D-1
+A=M
+D=M
+A=A-1
+M=M-D
+@5 // C_PUSH D_TEMP 6
+D=A
+@6
+D=D+A
+A=D
+D=M
+@SP
 A=M
 M=D
 @SP
