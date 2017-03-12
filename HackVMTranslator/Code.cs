@@ -13,6 +13,7 @@ namespace HackVMTranslator
         string pushRegister;
         string tempRegister;
         string staticRegister;
+        string pointerRegister;
         bool writeComments;
         public Code()
         {
@@ -25,6 +26,7 @@ namespace HackVMTranslator
             pushRegister = "R13";
             tempRegister = "5";
             staticRegister = "16";
+            pointerRegister = "3";
             writeComments = true;
         }
 
@@ -54,7 +56,6 @@ namespace HackVMTranslator
                         break;
                     }
 
-                    // For all the rest find dest address
                     if (dest == Destination.D_TEMP)
                     {
                         command = "@" + tempRegister + comment + "\nD=A\n";
@@ -62,8 +63,11 @@ namespace HackVMTranslator
                     } else if (dest == Destination.D_STATIC)
                     {
                         command = "@" + staticRegister + comment + "\nD=A\n";
+                    } else if (dest == Destination.D_POINTER)
+                    {
+                        command = "@" + pointerRegister + comment + "\nD=A\n";
                     }
-                    else // for all except temp or static
+                    else // for all except temp or static pointer
                     {
                         command = "@" + keywords[(int)dest] + comment + "\nD=M\n";
                     }
@@ -80,7 +84,12 @@ namespace HackVMTranslator
                     else if (dest == Destination.D_STATIC)
                     {
                         command = "@" + staticRegister + comment + "\nD=A\n";
-                    } else
+                    }
+                    else if (dest == Destination.D_POINTER)
+                    {
+                        command = "@" + pointerRegister + comment + "\nD=A\n";
+                    }
+                    else
                     {
                         command = "@" + keywords[(int)dest] + comment + "\nD=M\n";
                     }
