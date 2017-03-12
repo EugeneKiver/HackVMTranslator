@@ -27,7 +27,9 @@ namespace HackVMTranslator
         D_ARGUMENT,
         D_THIS,
         D_THAT,
-        D_TEMP
+        D_TEMP,
+        D_STATIC,
+        D_POINTER
     };
 
 
@@ -229,6 +231,11 @@ namespace HackVMTranslator
                     return Destination.D_THAT;
                 case "temp":
                     return Destination.D_TEMP;
+                case "static":
+                    return Destination.D_STATIC;
+                case "pointer":
+                    return Destination.D_POINTER;
+
                 default:
                     return Destination.D_NONE;
             }
