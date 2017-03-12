@@ -30,9 +30,7 @@ namespace HackVMTranslator
             writeComments = true;
         }
 
-
-
-        public string CodeCommand(Command com, Destination dest, int val)
+        public string CodeCommand(Command com, Destination dest, int val, string label)
         {
             string command = "";
             string comment = "";
@@ -42,12 +40,43 @@ namespace HackVMTranslator
                 case Command.C_ADD:
                     command = "@SP // ADD\nD=M\nM=D-1\nA=M\nD=M\nA=A-1\nM=M+D";
                     break;
-                //break;
-                case Command.C_AND:
-                    return "// AND isn't implemented yet";
                 case Command.C_SUB:
                     command = "@SP // SUB\nD=M\nM=D-1\nA=M\nD=M\nA=A-1\nM=M-D";
                     break;
+                case Command.C_NEG:
+                    command = "@SP // NEG\nD=M-1\nA=D\nM=-M";
+                    break;
+                case Command.C_EQ: //TODO
+                    command = "@SP // EQ\nD=M\nM=D-1\nA=M\nD=M\nA=A-1\nD=M-D";
+                    command += "\n@" + label + "-EQUAL\nD;JEQ\n@SP\nA=M-1\nM=0";
+                    command += "\n@" + label + "-END\n0;JMP"; // not then 0
+                    command += "\n(" + label + "-EQUAL)\n@SP\nA=M-1\nM=-1"; // true then -1
+                    command += "\n(" + label + "-END)";
+                    break;
+                case Command.C_GT:
+                    command = "@SP // EQ\nD=M\nM=D-1\nA=M\nD=M\nA=A-1\nD=M-D";
+                    command += "\n@" + label + "-GREATER\nD;JGT\n@SP\nA=M-1\nM=0";
+                    command += "\n@" + label + "-END\n0;JMP"; // not then 0
+                    command += "\n(" + label + "-GREATER)\n@SP\nA=M-1\nM=-1"; // true then -1
+                    command += "\n(" + label + "-END)";
+                    break;
+                case Command.C_LT:
+                    command = "@SP // EQ\nD=M\nM=D-1\nA=M\nD=M\nA=A-1\nD=M-D";
+                    command += "\n@" + label + "-GREATER\nD;JLT\n@SP\nA=M-1\nM=0";
+                    command += "\n@" + label + "-END\n0;JMP"; // not then 0
+                    command += "\n(" + label + "-GREATER)\n@SP\nA=M-1\nM=-1"; // true then -1
+                    command += "\n(" + label + "-END)";
+                    break;
+                case Command.C_AND:
+                    command = "@SP // AND\nD=M\nM=D-1\nA=M\nD=M\nA=A-1\nM=D&M";
+                    break;
+                case Command.C_OR:
+                    command = "@SP // OR\nD=M\nM=D-1\nA=M\nD=M\nA=A-1\nM=D|M";
+                    break;
+                case Command.C_NOT:
+                    command = "@SP // NOT\nD=M-1\nA=D\nM=!M";
+                    break;
+
                 case Command.C_PUSH:
                     // constant is way simpler than other
                     if (dest == Destination.D_CONSTANT)

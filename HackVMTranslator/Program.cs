@@ -11,7 +11,7 @@ namespace HackVMTranslator
     {
         static void Main(string[] args)
         {
-            bool setupMemoryMapping = true; // this is for testing purposes only, should be false for release
+            bool setupMemoryMapping = false; // this is for testing purposes only, should be false for release
             string srcExt = ".vm";
             string destExt = ".asm";
             string errMsg = "no file found: ";
@@ -63,7 +63,7 @@ namespace HackVMTranslator
                 {
                     string code = "";
                     parser.Advance();
-                    code = coder.CodeCommand(parser.GetCurCommand(), parser.GetCurDestination(), parser.GetCurValue());
+                    code = coder.CodeCommand(parser.GetCurCommand(), parser.GetCurDestination(), parser.GetCurValue(), parser.GetCurLabel());
                     //Console.WriteLine("cur command:" + parser.GetCurCommand() + " dest:" + parser.GetCurDestination() + " val:" + parser.GetCurValue());
                     output.Add(code);
                 }

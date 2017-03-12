@@ -69,6 +69,11 @@ namespace HackVMTranslator
             return currentValue;
         }
 
+        public string GetCurLabel()
+        {
+            return currentCommand.ToString() + currentIndex.ToString();
+        }
+
         /// <summary>
         /// Removes comments and white spaces.</summary>
         public void RemoveComments()
