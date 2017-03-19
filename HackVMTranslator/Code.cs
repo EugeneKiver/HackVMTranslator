@@ -137,7 +137,17 @@ namespace HackVMTranslator
                     command = "@" + dest + " // GOTO\n";
                     command += "0;JMP";
                     break;
-
+                case Command.C_FUNCTION:
+                    command = "(" + dest + ") // " + label;
+                    for (int i = 0; i < val; i++)
+                    {
+                        command += "\n@SP\nA=M\nM=0\n@SP\nM=M+1";
+                    }
+                    break;
+                case Command.C_RETURN:
+                    command = "@" + tempRegister + comment + "\nD=A\n"; // UNDONE
+                    break;
+                
                 default:
                     return "// " + com + " isn't implemented yet! ";
 

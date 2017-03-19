@@ -40,8 +40,7 @@ namespace HackVMTranslator
         Command currentCommand;
         string currentDest;
         int currentValue;
-        string currentLabel;
-
+        
         /// <summary>
         /// Initializes all vars and opens a file.</summary>
         public Parser(string[] inputCode)
@@ -103,10 +102,6 @@ namespace HackVMTranslator
         /// Creates custom label for construction of if-else for bitwise operations
         /// </summary>
         /// <returns></returns>
-        public string GetCurLabel()
-        {
-            return currentLabel;
-        }
 
 
         
@@ -275,6 +270,28 @@ namespace HackVMTranslator
                 {
                     currentCommand = Command.C_GOTO;
                     currentDest = parts[1];
+                }
+                return;
+            }
+            if (line.StartsWith("function"))
+            {
+                string[] parts = line.Split(new char[] { ' ' });
+                if (parts.Length > 0)
+                {
+                    currentCommand = Command.C_FUNCTION;
+                    currentDest = parts[1];
+                    currentValue = Int32.Parse(parts[2]);
+                }
+                return;
+            }
+            if (line.StartsWith("return"))
+            {
+                string[] parts = line.Split(new char[] { ' ' });
+                if (parts.Length > 0)
+                {
+                    currentCommand = Command.C_RETURN;
+                    //currentDest = parts[1];
+                    //currentValue = Int32.Parse(parts[2]);
                 }
                 return;
             }

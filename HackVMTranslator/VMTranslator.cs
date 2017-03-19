@@ -47,9 +47,19 @@ namespace HackVMTranslator
             if (setupMemoryMapping)
             {
                 string memoryMapping = "";
-                memoryMapping += "@256 // Setup Memory Mapping\nD=A\n@SP\nM=D\n@300\nD=A\n@LCL\nM=D\n";
-                memoryMapping += "@400\nD=A\n@ARG\nM=D\n@3000\nD=A\n@THIS\nM=D\n@3010\nD=A\n@THAT\nM=D\n";
-                memoryMapping += "@3\nD=A\n@ARG\nA=M\nM=D";
+                memoryMapping += "@317 // Setup Memory Mapping\nD=A\n@SP\nM=D\n"; // SP
+                memoryMapping += "@317\nD=A\n@LCL\nM=D\n"; // LCL
+                memoryMapping += "@310\nD=A\n@ARG\nM=D\n"; // ARG
+                memoryMapping += "@3000\nD=A\n@THIS\nM=D\n"; // THIS
+                memoryMapping += "@4000\nD=A\n@THAT\nM=D\n"; // THAT
+
+                memoryMapping += "@1234\nD=A\n@310\nM=D\n"; // ARG
+                memoryMapping += "@37\nD=A\n@311\nM=D\n"; // ARG
+                memoryMapping += "@9\nD=A\n@312\nM=D\n"; // ARG
+                memoryMapping += "@305\nD=A\n@313\nM=D\n"; // ARG
+                memoryMapping += "@300\nD=A\n@314\nM=D\n"; // ARG
+                memoryMapping += "@3010\nD=A\n@315\nM=D\n"; // ARG
+                memoryMapping += "@4010\nD=A\n@136\nM=D"; // ARG
                 output.Add(memoryMapping);
             }
             while (true)
