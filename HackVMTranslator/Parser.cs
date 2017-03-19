@@ -32,26 +32,56 @@ namespace HackVMTranslator
         D_POINTER
     };
 
-
     class Parser
     {
         string[] lines;
         List<string> code;
         int currentIndex;
         Command currentCommand;
-        Destination currentDest;
+        string currentDest;
         int currentValue;
+        string currentLabel;
 
         /// <summary>
         /// Initializes all vars and opens a file.</summary>
         public Parser(string[] inputCode)
         {
             currentIndex = -1;
-            currentDest = Destination.D_NONE;
+            currentDest = "";
             currentCommand = Command.C_NONE;
             currentValue = 0;
             lines = inputCode;
             code = new List<string>();
+            RemoveComments();
+        }
+
+        /// <summary>
+        /// Are there more commands in the input?</summary>
+        public bool HasMoreCommands()
+        {
+            if ((code.Count - 1) - currentIndex > 0)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Reads the next command from the input and makes it the current command.</summary>
+        /// <remarks>
+        /// Should be called only if hasMoreCommands() is true. Initially there is no current command.</remarks>
+        public void Advance()
+        {
+            if (HasMoreCommands())
+            {
+                currentIndex++;
+                ParseCommand();
+                /*if (currentCommand == Command.C_PUSH || currentCommand == Command.C_POP)
+                    Console.WriteLine(currentIndex + ": " + currentCommand + " " + currentDest + " " + currentValue);
+                else
+                    Console.WriteLine(currentIndex + ": " + currentCommand);
+                */
+            }
         }
 
         public Command GetCurCommand()
@@ -59,7 +89,7 @@ namespace HackVMTranslator
             return currentCommand;
         }
 
-        public Destination GetCurDestination()
+        public string GetCurDestination()
         {
             return currentDest;
         }
@@ -69,14 +99,22 @@ namespace HackVMTranslator
             return currentValue;
         }
 
+        /// <summary>
+        /// Creates custom label for construction of if-else for bitwise operations
+        /// </summary>
+        /// <returns></returns>
         public string GetCurLabel()
         {
-            return currentCommand.ToString() + currentIndex.ToString();
+            return currentLabel;
         }
+
+
+        
+
 
         /// <summary>
         /// Removes comments and white spaces.</summary>
-        public void RemoveComments()
+        private void RemoveComments()
         {
             //if (error > 0) { return; }
             foreach (string line in lines)
@@ -109,118 +147,8 @@ namespace HackVMTranslator
                 Console.WriteLine(i + ": " + code[i]);
             }*/
         }
-        
-        /// <summary>
-        /// Are there more commands in the input?</summary>
-        public bool HasMoreCommands()
-        {
-            if ((code.Count - 1) - currentIndex > 0)
-            {
-                return true;
-            }
-            return false;
-        }
 
-        /// <summary>
-        /// Reads the next command from the input and makes it the current command.</summary>
-        /// <remarks>
-        /// Should be called only if hasMoreCommands() is true. Initially there is no current command.</remarks>
-        public void Advance()
-        {
-            if (HasMoreCommands())
-            {
-                currentIndex++;
-                ParseCommand();
-                //WriteCommand();
-            }
-        }
-
-        /// <summary>
-        /// Returns the type of the current command.</summary>
-        public Command ParseCommand()
-        {
-            string line = code[currentIndex];
-            if (line.Contains("add"))
-            {
-                currentCommand = Command.C_ADD;
-                return Command.C_ARITHMETIC;
-            }
-            if (line.Contains("sub"))
-            {
-                currentCommand = Command.C_SUB;
-                return Command.C_ARITHMETIC;
-            }
-            if (line.Contains("neg"))
-            {
-                currentCommand = Command.C_NEG;
-                return Command.C_ARITHMETIC;
-            }
-            if (line.Contains("eq"))
-            {
-                currentCommand = Command.C_EQ;
-                return Command.C_ARITHMETIC;
-            }
-            if (line.Contains("gt"))
-            {
-                currentCommand = Command.C_GT;
-                return Command.C_ARITHMETIC;
-            }
-            if (line.Contains("lt"))
-            {
-                currentCommand = Command.C_LT;
-                return Command.C_ARITHMETIC;
-            }
-            if (line.Contains("and"))
-            {
-                currentCommand = Command.C_AND;
-                return Command.C_ARITHMETIC;
-            }
-            if (line.Contains("or"))
-            {
-                currentCommand = Command.C_OR;
-                return Command.C_ARITHMETIC;
-            }
-            if (line.Contains("not"))
-            {
-                currentCommand = Command.C_NOT;
-                return Command.C_ARITHMETIC;
-            }
-            if (line.Contains("push"))
-            {
-                string[] parts = line.Split(new char[] { ' ' });
-                if (parts.Length > 0)
-                {
-                    currentCommand = Command.C_PUSH;
-
-                    currentDest = GetDestination(parts[1]);
-                    currentValue = Int32.Parse(parts[2]);
-                }
-                return Command.C_PUSH;
-            }
-            if (line.Contains("pop"))
-            {
-                string[] parts = line.Split(new char[] { ' ' });
-                if (parts.Length > 0)
-                {
-                    currentCommand = Command.C_POP;
-
-                    currentDest = GetDestination(parts[1]);
-                    currentValue = Int32.Parse(parts[2]);
-                }
-                return Command.C_PUSH;
-            }
-            return Command.C_NONE;
-        }
-
-        public void WriteCommand()
-        {
-            if (currentCommand == Command.C_PUSH || currentCommand == Command.C_POP)
-                Console.WriteLine(currentIndex + ": " + currentCommand + " " + currentDest + " " + currentValue);
-            else
-                Console.WriteLine(currentIndex + ": " + currentCommand);
-
-        }
-        private Destination GetDestination(string strDest)
+        /*private Destination CheckKnownDestination(string strDest)
         {
             switch (strDest)
             {
@@ -244,7 +172,113 @@ namespace HackVMTranslator
                 default:
                     return Destination.D_NONE;
             }
-        }
+        }*/
+        
+        /// <summary>
+        /// Parses command and stores current context in global vars. 
+        /// TODO fix arithmetic return</summary>
+        private void ParseCommand()
+        {
+            string line = code[currentIndex];
+            if (line.StartsWith("add"))
+            {
+                currentCommand = Command.C_ADD;
+                return;
+            }
+            if (line.StartsWith("sub"))
+            {
+                currentCommand = Command.C_SUB;
+                return;
+            }
+            if (line.StartsWith("neg"))
+            {
+                currentCommand = Command.C_NEG;
+                return;
+            }
+            if (line.StartsWith("eq"))
+            {
+                currentCommand = Command.C_EQ;
+                return;
+            }
+            if (line.StartsWith("gt"))
+            {
+                currentCommand = Command.C_GT;
+                return;
+            }
+            if (line.StartsWith("lt"))
+            {
+                currentCommand = Command.C_LT;
+                return;
+            }
+            if (line.StartsWith("and"))
+            {
+                currentCommand = Command.C_AND;
+                return;
+            }
+            if (line.StartsWith("or"))
+            {
+                currentCommand = Command.C_OR;
+                return;
+            }
+            if (line.StartsWith("not"))
+            {
+                currentCommand = Command.C_NOT;
+                return;
+            }
+            if (line.StartsWith("push"))
+            {
+                string[] parts = line.Split(new char[] { ' ' });
+                if (parts.Length > 0)
+                {
+                    currentCommand = Command.C_PUSH;
+                    currentDest = parts[1];
+                    currentValue = Int32.Parse(parts[2]);
+                }
+                return;
+            }
+            if (line.StartsWith("pop"))
+            {
+                string[] parts = line.Split(new char[] { ' ' });
+                if (parts.Length > 0)
+                {
+                    currentCommand = Command.C_POP;
+                    currentDest = parts[1];
+                    currentValue = Int32.Parse(parts[2]);
+                }
+                return;
+            }
 
+            if (line.StartsWith("label"))
+            {
+                string[] parts = line.Split(new char[] { ' ' });
+                if (parts.Length > 0)
+                {
+                    currentCommand = Command.C_LABEL;
+                    currentDest = parts[1];
+                }
+                return;
+            }
+            if (line.StartsWith("if-goto"))
+            {
+                string[] parts = line.Split(new char[] { ' ' });
+                if (parts.Length > 0)
+                {
+                    currentCommand = Command.C_IF;
+                    currentDest = parts[1];
+                }
+                return;
+            }
+            if (line.StartsWith("goto"))
+            {
+                string[] parts = line.Split(new char[] { ' ' });
+                if (parts.Length > 0)
+                {
+                    currentCommand = Command.C_GOTO;
+                    currentDest = parts[1];
+                }
+                return;
+            }
+            return;
+        }
     }
 }

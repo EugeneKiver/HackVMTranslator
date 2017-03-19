@@ -11,14 +11,12 @@ namespace HackVMTranslator
     {
         static void Main(string[] args)
         {
-            bool setupMemoryMapping = false; // this is for testing purposes only, should be false for release
+            bool setupMemoryMapping = true; // this is for testing purposes only, should be false for release
             string srcExt = ".vm";
             string destExt = ".asm";
-            string errMsg = "no file found: ";
             string file = args[0];
             string path = "";
-            int error = 0;
-            string[] input;
+            string[] input  ;
             List<string> output = new List<string>();
             //SymbolTable table = SymbolTable.Instance;
 
@@ -28,8 +26,7 @@ namespace HackVMTranslator
             }
             catch (Exception e)
             {
-                Console.WriteLine(errMsg + path);
-                error = 1;
+                Console.WriteLine(e.ToString() + "\n" + path);
                 return;
             }
 
@@ -39,13 +36,11 @@ namespace HackVMTranslator
             }
             else
             {
-                Console.WriteLine(errMsg + path);
-                error = 1;
+                Console.WriteLine("error " + path);
                 return;
             }
 
             Parser parser = new Parser(input);
-            parser.RemoveComments();
             Code coder = new Code();
 
             int iteration = 0;
@@ -53,7 +48,8 @@ namespace HackVMTranslator
             {
                 string memoryMapping = "";
                 memoryMapping += "@256 // Setup Memory Mapping\nD=A\n@SP\nM=D\n@300\nD=A\n@LCL\nM=D\n";
-                memoryMapping += "@400\nD=A\n@ARG\nM=D\n@3000\nD=A\n@THIS\nM=D\n@3010\nD=A\n@THAT\nM=D";
+                memoryMapping += "@400\nD=A\n@ARG\nM=D\n@3000\nD=A\n@THIS\nM=D\n@3010\nD=A\n@THAT\nM=D\n";
+                memoryMapping += "@3\nD=A\n@ARG\nA=M\nM=D";
                 output.Add(memoryMapping);
             }
             while (true)
@@ -63,7 +59,7 @@ namespace HackVMTranslator
                 {
                     string code = "";
                     parser.Advance();
-                    code = coder.CodeCommand(parser.GetCurCommand(), parser.GetCurDestination(), parser.GetCurValue(), parser.GetCurLabel());
+                    code = coder.CodeCommand(parser.GetCurCommand(), parser.GetCurDestination(), parser.GetCurValue(), iteration);
                     //Console.WriteLine("cur command:" + parser.GetCurCommand() + " dest:" + parser.GetCurDestination() + " val:" + parser.GetCurValue());
                     output.Add(code);
                 }
