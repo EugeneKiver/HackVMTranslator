@@ -145,7 +145,21 @@ namespace HackVMTranslator
                     }
                     break;
                 case Command.C_RETURN:
-                    command = "@" + tempRegister + comment + "\nD=A\n"; // UNDONE
+                    command =  "@LCL // RETURN START: *FRAME = *LCL\n" + "D=M\n" + "@FRAME\n" + "M=D\n"; //Is temp var equal to ex LCL address
+                    //         A=LCL adr   D=*LCL   A=FRAME adr   *FR=*LCL    
+                    //command += "@5\nD=D-A\nA=D\nD=M\n@RET\nM=D // ret = *(FRAME-5)\n";
+                    command += "@SP // *ARG=*(*SP-1) RETURN value placed\n" + "M=M-1\n" + "A=M\n" + "D=M\n" + "@ARG\n" + "A=M\n" + "M=D\n";
+                    //          A=SP ard  *SP=*SP-1   A=*SP-1  D=*(*SP-1) A=ARG ard  A=*ARG    *ARG=*(*SP-1) // *ARG=*RET_VAL
+                    command += "@ARG // *SP=*ARG+1\n" + "D=M+1\n" + "@SP\n" + "M=D\n";
+                    //          A=ARG adr  D=*ARG+1    A=SP adr  *SP=*ARG+1  // Set SP to ARG+1 now ret value is on top of stack and SP is above
+                    command += "@FRAME // *THAT=*(FRAME-1)\n" + "D=M\n" + "@1\n" + "D=D-A\n" + "A=D\n" + "D=M\n" + "@THAT\n" + "M=D\n";
+                    //          FR addr      D=FR      A=1      D=FR-1      A=FR-1   *(FR-1)    A=THAT     *THAT=*(FR-1)
+                    command += "@FRAME // *THIS=*(FRAME-2)\nD=M\n@2\nD=D-A\nA=D\nD=M\n@THIS\nM=D\n";
+                    command += "@FRAME // *ARG=*(FRAME-3)\nD=M\n@3\nD=D-A\nA=D\nD=M\n@ARG\nM=D\n";
+                    command += "@FRAME // *LCL=*(FRAME-4)\nD=M\n@4\nD=D-A\nA=D\nD=M\n@LCL\nM=D\n";
+                    //command += "@RET\nA=M\n0; JMP";
+                    command += "@FRAME // return to *(FRAME-5)\n" + "D=M\n" + "@5\n" + "A=D-A\n" + "A=M\n" + "0; JMP";
+                    //          FR addr      D=FR      A=5      A=FR-5     A=*(FR-5)  goto *(FR-5)
                     break;
                 
                 default:
