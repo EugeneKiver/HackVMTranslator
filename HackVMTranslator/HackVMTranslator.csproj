@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Code.cs" />
+    <Compile Include="FileHandler.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="VMTranslator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

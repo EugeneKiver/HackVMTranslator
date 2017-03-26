@@ -16,7 +16,8 @@ namespace HackVMTranslator
         C_PUSH, C_POP,
         C_LABEL, C_GOTO,
         C_IF, C_FUNCTION,
-        C_RETURN, C_CALL
+        C_RETURN, C_CALL,
+        C_BOOTSTRAP
     };
 
     enum Destination
@@ -292,6 +293,17 @@ namespace HackVMTranslator
                     currentCommand = Command.C_RETURN;
                     //currentDest = parts[1];
                     //currentValue = Int32.Parse(parts[2]);
+                }
+                return;
+            }
+            if (line.StartsWith("call"))
+            {
+                string[] parts = line.Split(new char[] { ' ' });
+                if (parts.Length > 0)
+                {
+                    currentCommand = Command.C_CALL;
+                    currentDest = parts[1];
+                    currentValue = Int32.Parse(parts[2]);
                 }
                 return;
             }

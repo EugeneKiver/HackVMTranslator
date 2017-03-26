@@ -15,6 +15,7 @@ namespace HackVMTranslator
         string staticRegister;
         string pointerRegister;
         bool writeComments;
+        string currentFunction;
         public Code()
         {
             keywords = new Dictionary<string, string>();
@@ -28,13 +29,21 @@ namespace HackVMTranslator
             staticRegister = "16";
             pointerRegister = "3";
             writeComments = true;
+            currentFunction = "";
         }
 
-        public string CodeCommand(Command com, string dest, int val, int iteration)
+        public string CodeBootstrap(string fileName)
+        {
+            string command = ("@256 // BOOTSTRAP\n" + "D=A\n" + "@SP\n" + "M=D\n");
+            command += CodeCommand(Command.C_CALL, "Sys.init", 0, 0, fileName);
+            return command;
+        }
+
+        public string CodeCommand(Command com, string dest, int val, int iteration, string fileName)
         {
             string command = "";
             string comment = "";
-            string label = com.ToString() + iteration.ToString();
+            string label = fileName + "." + com.ToString() + iteration.ToString();
 
             if (writeComments) { comment = " // " + com.ToString() + " " + dest.ToString() + " " + val.ToString(); }
             switch (com)
@@ -50,24 +59,24 @@ namespace HackVMTranslator
                     break;
                 case Command.C_EQ:
                     command = "@SP // EQ\nD=M\nM=D-1\nA=M\nD=M\nA=A-1\nD=M-D";
-                    command += "\n@" + label + "-EQUAL\nD;JEQ\n@SP\nA=M-1\nM=0";
-                    command += "\n@" + label + "-END\n0;JMP"; // not then 0
-                    command += "\n(" + label + "-EQUAL)\n@SP\nA=M-1\nM=-1"; // true then -1
-                    command += "\n(" + label + "-END)";
+                    command += "\n@EQ-EQUAL" + iteration + "\nD;JEQ\n@SP\nA=M-1\nM=0";
+                    command += "\n@EQ-END" + iteration + "\n0;JMP"; // not then 0
+                    command += "\n(EQ-EQUAL" + iteration + ")\n@SP\nA=M-1\nM=-1"; // true then -1
+                    command += "\n(EQ-END" + iteration + ")";
                     break;
                 case Command.C_GT:
-                    command = "@SP // EQ\nD=M\nM=D-1\nA=M\nD=M\nA=A-1\nD=M-D";
-                    command += "\n@" + label + "-GREATER\nD;JGT\n@SP\nA=M-1\nM=0";
-                    command += "\n@" + label + "-END\n0;JMP"; // not then 0
-                    command += "\n(" + label + "-GREATER)\n@SP\nA=M-1\nM=-1"; // true then -1
-                    command += "\n(" + label + "-END)";
+                    command = "@SP // GT\nD=M\nM=D-1\nA=M\nD=M\nA=A-1\nD=M-D";
+                    command += "\n@GT-GREATER" + iteration + "\nD;JGT\n@SP\nA=M-1\nM=0";
+                    command += "\n@GT-END" + iteration + "\n0;JMP"; // not then 0
+                    command += "\n(GT-GREATER" + iteration + ")\n@SP\nA=M-1\nM=-1"; // true then -1
+                    command += "\n(GT-END" + iteration + ")";
                     break;
                 case Command.C_LT:
-                    command = "@SP // EQ\nD=M\nM=D-1\nA=M\nD=M\nA=A-1\nD=M-D";
-                    command += "\n@" + label + "-GREATER\nD;JLT\n@SP\nA=M-1\nM=0";
-                    command += "\n@" + label + "-END\n0;JMP"; // not then 0
-                    command += "\n(" + label + "-GREATER)\n@SP\nA=M-1\nM=-1"; // true then -1
-                    command += "\n(" + label + "-END)";
+                    command = "@SP // LT\nD=M\nM=D-1\nA=M\nD=M\nA=A-1\nD=M-D";
+                    command += "\n@LT-GREATER" + iteration + "\nD;JLT\n@SP\nA=M-1\nM=0";
+                    command += "\n@LT-END" + iteration + "\n0;JMP"; // not then 0
+                    command += "\n(LT-GREATER" + iteration + ")\n@SP\nA=M-1\nM=-1"; // true then -1
+                    command += "\n(LT-END" + iteration + ")";
                     break;
                 case Command.C_AND:
                     command = "@SP // AND\nD=M\nM=D-1\nA=M\nD=M\nA=A-1\nM=D&M";
@@ -128,20 +137,22 @@ namespace HackVMTranslator
                     command += "@" + pushRegister + "\nA=M\nM=D";
                     break;
                 case Command.C_LABEL:
-                    command = "(" +  dest + ") // LABEL";
+                    command = "(" + currentFunction + "$" +  dest + ") // LABEL";
                     break;
                 case Command.C_IF:
-                    command = "@SP // IF-GOTO\nAM=M-1\nD=M\n@" + dest + "\nD;JNE";
+                    command = "@SP // IF-GOTO\nAM=M-1\nD=M\n@" + currentFunction + "$" + dest + "\nD;JNE";
                     break;
                 case Command.C_GOTO:
-                    command = "@" + dest + " // GOTO\n";
+                    command = "@" + currentFunction + "$" + dest + " // GOTO\n";
                     command += "0;JMP";
                     break;
                 case Command.C_FUNCTION:
+                    currentFunction = dest;
                     command = "(" + dest + ") // " + label;
                     for (int i = 0; i < val; i++)
                     {
                         command += "\n@SP\nA=M\nM=0\n@SP\nM=M+1";
+                        
                     }
                     break;
                 case Command.C_RETURN:
@@ -160,7 +171,20 @@ namespace HackVMTranslator
                     //command += "@RET\nA=M\n0; JMP";
                     command += "@FRAME // return to *(FRAME-5)\n" + "D=M\n" + "@5\n" + "A=D-A\n" + "A=M\n" + "0; JMP";
                     //          FR addr      D=FR      A=5      A=FR-5     A=*(FR-5)  goto *(FR-5)
+                    //currentFunction = "";
                     break;
+                case Command.C_CALL:
+                    command = "@RETURN-" + dest + comment + "\n";
+                    command += "D=A // push return-address\n" + "@SP\n" + "A=M\n" + "M=D\n";
+                    command += "@SP // push LCL\n" + "M=M+1\n" + "@LCL\n" + "D=M\n" + "@SP\n" + "A=M\n" + "M=D\n";
+                    command += "@SP // push ARG\n" + "M=M+1\n" + "@ARG\n" + "D=M\n" + "@SP\n" + "A=M\n" + "M=D\n";
+                    command += "@SP // push THIS\n" + "M=M+1\n" + "@THIS\n" + "D=M\n" + "@SP\n" + "A=M\n" + "M=D\n";
+                    command += "@SP // push THAT\n" + "M=M+1\n" + "@THAT\n" + "D=M\n" + "@SP\n" + "A=M\n" + "M=D\n";
+                    command += "@SP // ARG = SP-n-5\n" + "M=M+1\n" + "D=M\n" + "@1\n" + "D=D-A\n" + "@5\n" + "D=D-A\n" + "@ARG\n" + "M=D\n";
+                    command += "@SP // LCL = SP\n" + "D=M\n" + "@LCL\n" + "M=D\n";
+                    command += "@" + dest + " // end of call to " + dest + "\n" + "0; JMP\n" + "(" + "RETURN-" + dest + ")";
+                    break;
+                
                 
                 default:
                     return "// " + com + " isn't implemented yet! ";
