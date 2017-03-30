@@ -101,7 +101,7 @@ namespace HackVMTranslator
                         
                     } else if (dest == "static")
                     {
-                        command = "@" + staticRegister + comment + "\nD=A\n";
+                        command = "@" + fileName + "." + val + comment + "\nD=A\n";
                     } else if (dest == "pointer")
                     {
                         command = "@" + pointerRegister + comment + "\nD=A\n";
@@ -122,7 +122,7 @@ namespace HackVMTranslator
                     }
                     else if (dest == "static")
                     {
-                        command = "@" + staticRegister + comment + "\nD=A\n";
+                        command = "@" + fileName + "." + val + comment + "\nD=A\n";
                     }
                     else if (dest == "pointer")
                     {
