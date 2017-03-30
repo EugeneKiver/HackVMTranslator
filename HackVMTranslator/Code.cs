@@ -174,7 +174,7 @@ namespace HackVMTranslator
                     //currentFunction = "";
                     break;
                 case Command.C_CALL:
-                    command = "@RETURN-" + dest + comment + "\n";
+                    command = "@RETURN-" + dest + iteration + comment + "\n";
                     command += "D=A // push return-address\n" + "@SP\n" + "A=M\n" + "M=D\n";
                     command += "@SP // push LCL\n" + "M=M+1\n" + "@LCL\n" + "D=M\n" + "@SP\n" + "A=M\n" + "M=D\n";
                     command += "@SP // push ARG\n" + "M=M+1\n" + "@ARG\n" + "D=M\n" + "@SP\n" + "A=M\n" + "M=D\n";
@@ -182,7 +182,7 @@ namespace HackVMTranslator
                     command += "@SP // push THAT\n" + "M=M+1\n" + "@THAT\n" + "D=M\n" + "@SP\n" + "A=M\n" + "M=D\n";
                     command += "@SP // ARG = SP-n-5\n" + "M=M+1\n" + "D=M\n" + "@1\n" + "D=D-A\n" + "@5\n" + "D=D-A\n" + "@ARG\n" + "M=D\n";
                     command += "@SP // LCL = SP\n" + "D=M\n" + "@LCL\n" + "M=D\n";
-                    command += "@" + dest + " // end of call to " + dest + "\n" + "0; JMP\n" + "(" + "RETURN-" + dest + ")";
+                    command += "@" + dest + " // end of call to " + dest + "\n" + "0; JMP\n" + "(" + "RETURN-" + dest + iteration + ")";
                     break;
                 
                 
