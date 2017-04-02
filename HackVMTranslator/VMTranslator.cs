@@ -15,8 +15,10 @@ namespace HackVMTranslator
             if (!fileHandler.IsValid()) { return; }
 
             Code coder = new Code();
-            fileHandler.AddLine(coder.CodeBootstrap(fileHandler.GetCurFileName()));
-
+            if (fileHandler.IsProgram())
+            {
+                fileHandler.AddLine(coder.CodeBootstrap(fileHandler.GetCurFileName()));
+            }
             while (fileHandler.HasMoreFiles())
             { 
                 Parser parser = new Parser(fileHandler.Advance());

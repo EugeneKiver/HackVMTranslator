@@ -18,12 +18,14 @@ namespace HackVMTranslator
         List<string> lines;
         FileAttributes attr;
         bool isValid;
+        bool isProgram; // if we compile mulitple files we add bootstrap code
         int currentIndex;
         string destFileName;
 
         public FileHandler(string[] args)
         {
             isValid = false;
+            isProgram = false;
             srcExt = "vm";
             destExt = "asm";
             lines = new List<string>();
@@ -40,12 +42,29 @@ namespace HackVMTranslator
             //detect whether its a directory or file
             if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
             { // Handle directory
+                //Console.WriteLine("working on dir");
                 files = Directory.GetFiles(@args[0], "*." + srcExt);
-                destFileName = Path.GetDirectoryName(@args[0]).ToString();
-                destFileName += @"\";
+                destFileName = Path.GetFullPath(@args[0]);
+                //destFileName = Path.GetDirectoryName(@args[0]).ToString();
+                if (destFileName.EndsWith(@"\"))
+                {
+                    
+                //    Console.WriteLine("path ends with slash ");
+                } else
+                {
+                    //destFileName += @"\";
+                    destFileName += Path.DirectorySeparatorChar;
+                //    Console.WriteLine("path ends with nothing ");
+                }
+                
+                //Console.WriteLine("destFileName " + destFileName);
                 string dirName = new DirectoryInfo(@args[0]).Name;
                 destFileName += dirName;
                 destFileName += "." + destExt;
+                isProgram = true;
+
+                //Console.WriteLine("Folder destFileName " + destFileName);
+                //Console.ReadKey();
             }
             else
             { // Handle file
@@ -54,13 +73,16 @@ namespace HackVMTranslator
                 destFileName = args[0];
                 try
                 {
-                    destFileName.Replace(srcExt, destExt);
+                    destFileName = destFileName.Replace("vm", "asm");
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine("Can't replace extension");
                     return;
                 }
+                //Console.WriteLine("File destFileName " + destFileName);
+                //Console.ReadKey();
+
             }
             fileNames = new string[files.Length];
             for (int i=0; i< files.Length; i++)
@@ -129,5 +151,8 @@ namespace HackVMTranslator
             File.WriteAllLines(destFileName, codeArray);
             return true;
         }
+
+        public bool IsProgram()
+        { return isProgram; }
     }
 }

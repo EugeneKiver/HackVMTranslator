@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartArguments>C:\work\nand2tetris\projects\08\FunctionCalls\StaticsTest\</StartArguments>
+    <StartArguments>C:\work\nand2tetris\projects\08\ProgramFlow\BasicLoop</StartArguments>
   </PropertyGroup>
 </Project>
